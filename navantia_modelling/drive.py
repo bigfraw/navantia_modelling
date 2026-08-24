@@ -49,6 +49,30 @@ class MassProperties:
         return self.mass * g * self.lever_arm
 
 
+def lever_arm(slew_deg, r_cg: float, phase_deg: float = 0.0):
+    """Give the lever arm d [m] at the gimbal slew angle slew_deg [deg].
+
+    The centre of gravity is at the radius r_cg from the gimbal axis. A slew
+    turns the centre of gravity about that axis. The disturbance torque uses
+    only the part of r_cg that is perpendicular to the base acceleration:
+
+        d(phi) = r_cg * |cos(phi - phase)|
+
+    `phase_deg` is the slew angle where d is at the maximum. It is a
+    PLACEHOLDER. The build geometry of the centre of gravity gives the true
+    value, and the concept gate sets that geometry. The default value of 0 deg
+    puts the maximum at boresight.
+
+    The moment of inertia I does not change with this slew. A rotation about
+    an axis does not change the moment of inertia about that same axis.
+
+    The parameter `slew_deg` is a scalar or an array. The result has the same
+    shape.
+    """
+    slew = np.asarray(slew_deg, dtype=float)
+    return r_cg * np.abs(np.cos(np.radians(slew - phase_deg)))
+
+
 def disturbance_torque(f, mp: MassProperties):
     """Give the zero-to-peak disturbance torque [N m] at the frequency f [Hz].
 

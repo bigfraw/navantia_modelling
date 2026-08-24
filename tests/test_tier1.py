@@ -10,6 +10,7 @@ from navantia_modelling import (
     MassProperties,
     acceleration,
     displacement_band_bound,
+    lever_arm,
     openloop_bound,
     spec,
 )
@@ -39,6 +40,23 @@ def test_bound_rolls_off_as_inverse_f_squared_above_crossover():
     a = float(openloop_bound(20.0, MP))
     b = float(openloop_bound(40.0, MP))
     assert np.isclose(a / b, 4.0, rtol=1e-6)
+
+
+def test_lever_arm_geometry():
+    # The lever arm is at the maximum at the phase angle, and it is zero at
+    # 90 deg from the phase angle. There the CG is in line with the base
+    # acceleration, thus it gives no torque about the axis.
+    assert np.isclose(lever_arm(0.0, 0.05, phase_deg=0.0), 0.05)
+    assert np.isclose(lever_arm(90.0, 0.05, phase_deg=0.0), 0.0, atol=1e-17)
+    # A slew of +/-30 deg from the maximum gives cos(30) = 0.866 of r_cg.
+    assert np.isclose(lever_arm([-30.0, 30.0], 0.05, 0.0), 0.05 * np.cos(np.pi / 6)).all()
+
+
+def test_bound_is_linear_in_lever_arm():
+    # The bound scales with d. Thus the slew envelope is a simple band.
+    single = openloop_bound(20.0, MassProperties(mass=8.0, lever_arm=0.05, inertia=0.08))
+    double = openloop_bound(20.0, MassProperties(mass=8.0, lever_arm=0.10, inertia=0.08))
+    assert np.isclose(double / single, 2.0, rtol=1e-12)
 
 
 def test_plateau_matches_closed_form():

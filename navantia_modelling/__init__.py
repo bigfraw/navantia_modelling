@@ -17,7 +17,7 @@ compensator C of the mount. They are extension points.
 """
 
 from .spec import VibrationSpec, acceleration, displacement
-from .drive import MassProperties, disturbance_torque
+from .drive import MassProperties, disturbance_torque, lever_arm
 from .jitter import openloop_bound, displacement_band_bound
 
 __all__ = [
@@ -26,6 +26,7 @@ __all__ = [
     "displacement",
     "MassProperties",
     "disturbance_torque",
+    "lever_arm",
     "openloop_bound",
     "displacement_band_bound",
 ]

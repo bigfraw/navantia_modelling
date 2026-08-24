@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from navantia_modelling import (  # noqa: E402
     MassProperties,
     displacement_band_bound,
+    lever_arm,
     openloop_bound,
     spec,
 )
@@ -30,10 +32,14 @@ from navantia_modelling.jitter import as_microrad  # noqa: E402
 # PLACEHOLDER range of the mass properties. These are NOT design values.
 # Replace them when the concept gate closes and the envelope of the baseboard
 # and the enclosure is frozen.
+R_CG = 0.05            # m,   <-- PLACEHOLDER, the CG radius from the axis
+PHASE_DEG = 0.0        # deg, <-- PLACEHOLDER, the slew angle of the maximum d
+SLEW_LIMIT_DEG = 30.0  # deg, the slew range of the mount
+
 MP = MassProperties(
-    mass=8.0,        # kg      <-- PLACEHOLDER
-    lever_arm=0.05,  # m       <-- PLACEHOLDER (near the maximum slew value)
-    inertia=0.08,    # kg m^2  <-- PLACEHOLDER
+    mass=8.0,                                   # kg      <-- PLACEHOLDER
+    lever_arm=lever_arm(0.0, R_CG, PHASE_DEG),  # m, the value at boresight
+    inertia=0.08,                               # kg m^2  <-- PLACEHOLDER
 )
 # -------------------------------------------------------------------------
 
@@ -64,6 +70,26 @@ def main() -> None:
     print("  frequency. The closed-loop maximum stays at a high frequency, because")
     print("  the loop decreases the low plateau but does not change the high band.")
 
+    # --- The envelope of d across the slew range --------------------------
+    # The bound is linear in d, and its maximum against frequency is always at
+    # crossover. Thus one evaluation at F_CROSS gives the peak at each angle.
+    slew = np.linspace(-SLEW_LIMIT_DEG, SLEW_LIMIT_DEG, 13)
+    d_slew = lever_arm(slew, R_CG, PHASE_DEG)
+    peak = np.array(
+        [as_microrad(openloop_bound(spec.F_CROSS, replace(MP, lever_arm=d))) for d in d_slew]
+    )
+
+    print()
+    print(f"  Envelope of the lever arm d across a slew of +/-{SLEW_LIMIT_DEG:.0f} deg")
+    print(f"  (r_cg = {R_CG} m, the maximum of d is at {PHASE_DEG:.0f} deg):")
+    print("    slew [deg]   d [mm]   peak bound [urad]")
+    for s, d, p in zip(slew, d_slew, peak):
+        print(f"    {s:9.1f}   {d*1e3:6.2f}   {p:15.1f}")
+    print(f"  d from {d_slew.min()*1e3:.2f} mm to {d_slew.max()*1e3:.2f} mm.")
+    print(f"  The peak bound is from {peak.min():.1f} urad to {peak.max():.1f} urad.")
+    print("  Use the maximum value as the bound. The value of PHASE_DEG sets which")
+    print("  slew angle gives that maximum, and PHASE_DEG is a PLACEHOLDER.")
+
     if args.plot:
         try:
             import matplotlib
@@ -75,8 +101,16 @@ def main() -> None:
             return
 
         fig, ax = plt.subplots(figsize=(7, 4.2))
-        ax.loglog(f, theta_urad, lw=2)
+        # The bound is linear in d. Thus the slew range gives a band.
+        scale_lo = d_slew.min() / MP.lever_arm
+        scale_hi = d_slew.max() / MP.lever_arm
+        ax.fill_between(
+            f, theta_urad * scale_lo, theta_urad * scale_hi,
+            alpha=0.25, label=f"slew +/-{SLEW_LIMIT_DEG:.0f} deg",
+        )
+        ax.loglog(f, theta_urad, lw=2, label="boresight")
         ax.axvline(spec.F_CROSS, ls="--", color="0.5", lw=1)
+        ax.legend(fontsize=8)
         ax.text(spec.F_CROSS * 1.05, theta_urad.min() * 1.4, "13.2 Hz\ncrossover", fontsize=8, color="0.4")
         ax.set_xlabel("frequency [Hz]")
         ax.set_ylabel("open-loop angle bound [urad, 0-pk]")
