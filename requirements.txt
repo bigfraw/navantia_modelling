@@ -1,3 +1,3 @@
 numpy>=1.21
-matplotlib>=3.5   # optional, for the demo plot
-pytest>=7         # optional, for the tests
+matplotlib>=3.5   # optional. Use it for the example plot.
+pytest>=7         # optional. Use it for the tests.
