@@ -56,10 +56,12 @@ The repository contains two modelling threads:
 
 1. **Vibration to pointing jitter.** This thread is complete. It converts the
    ship qualification vibration standard into a residual pointing angle.
-2. **End-to-end FSOC coupling simulation.** This thread has a design, but no
-   code. It is a closed-loop propagation model with two agents. The fibre
-   coupling efficiency is a result of the turbulence physics. The model does
-   not set the coupling efficiency directly.
+2. **End-to-end FSOC coupling simulation.** The full closed-loop propagation
+   model has no code. It uses two agents. The fibre coupling efficiency is a
+   result of the turbulence physics. The model does not set the coupling
+   efficiency directly. A first one-way bridge now exists. It maps the Tier 1
+   jitter to an MMF coupling loss with the `optical_link_budget` package. It
+   has no turbulence and no closed loop. See §6.
 
 This repository is the location of the code, the runs, the tests, and the
 commits. The derivation history, the specification decisions, and the design
@@ -164,6 +166,18 @@ bound.
   because the rigid mass turns as one body. Only a gimbal slew changes `d`. In
   closed-loop tracking, the ship roll causes the slew that corrects the roll.
   Thus `d` changes with the state during a roll cycle.
+- **The CG offset is a vector, not one distance.** The offset from the gimbal
+  centre to the centre of gravity is a 3-vector `(ox, oy, oz)`. Each gimbal
+  axis sees only the part perpendicular to it. Thus each axis has its own arm
+  `r_perp` and its own inertia. An offset along an axis gives `r_perp = 0`, and
+  that axis has no vibration torque. Do not use one distance for all axes.
+- **The inertia resists the torque; the arm makes it.** The open-loop angle is
+  `theta ∝ r_perp / (I_cg + m·r_perp²)`. For a uniform body `I_cg = m·k²`, thus
+  the mass cancels and `theta` depends only on the geometry. The radius of
+  gyration `k` is the geometry. The jitter is a maximum when `r_perp` equals
+  `k`. A larger offset then decreases the jitter. Thus the mass placeholder
+  does not change the open-loop jitter of a uniform block. It changes the
+  holding torque.
 - **Gravity is a different load.** The term `m·g·d` is a static holding torque
   and a droop load. Use it for motor sizing. Do not put it in the jitter
   calculation.
@@ -174,8 +188,25 @@ bound.
 
 ## 6. The architecture of the coupling simulation
 
-There is no code for this thread. When you write the code, use this
-architecture:
+The closed-loop simulation has no code. A one-way bridge exists in
+`scripts/vibration_to_coupling.py`. The bridge maps the Tier 1 jitter to an
+MMF coupling loss. It uses the `optical_link_budget` package (`olb`) from
+`D:/repos/optical_link_budget`. It has no turbulence and no closed loop. The
+bridge gives two results:
+
+- The deterministic loss at the peak offset. The swept sine is zero to peak,
+  thus this is the primary result. It is the worst instantaneous coupling.
+- The statistical mean loss from `olb`. This is for comparison only. The `olb`
+  package uses a per-axis 1-sigma Gaussian tilt and a Rayleigh offset. Our
+  input is a deterministic swept sine, thus the statistic does not match. Do
+  not put `theta_pk / sqrt(2)` into `olb` and treat the result as correct.
+
+The bridge also inverts the loss. For a coupling-loss budget, it gives the
+necessary loop rejection at 13.2 Hz. This rejection is a **Tier 2 requirement
+on the mount**. It is not a value we set. The bridge does not invent the loop
+sensitivity `S`.
+
+When you write the closed-loop code, use this architecture:
 
 - **Use one common terminal interface and two alternative backends.**
   - *(a) The analytical backend.* The terminal receives an angle-of-arrival
@@ -246,8 +277,15 @@ navantia_modelling/          # the package
   jitter.py                  # the Tier 1 open-loop bound
 scripts/
   tier1_openloop_bound.py    # a frequency sweep, with an optional plot
+  vibration_to_coupling.py   # the jitter-to-MMF-loss bridge (needs olb)
 tests/
   test_tier1.py              # tests that are also a record of the physics
 ```
 
-Commands: `python scripts/tier1_openloop_bound.py --plot` and `pytest`
+The block, the CG offset vector, and the axis inertias live in
+`tier1_openloop_bound.py`. The bridge imports them. Thus there is one source of
+truth for the mass properties. The bridge also needs the `optical_link_budget`
+package at `D:/repos/optical_link_budget`.
+
+Commands: `python scripts/tier1_openloop_bound.py --plot`,
+`python scripts/vibration_to_coupling.py --plot`, and `pytest`
