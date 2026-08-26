@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "D:/repos/optical_link_budget"
+    ]
+}
