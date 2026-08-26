@@ -34,7 +34,7 @@ from navantia_modelling.jitter import as_microrad  # noqa: E402
 # primitives and the derived values follow. Replace them when the concept gate
 # closes and the envelope of the baseboard and the enclosure is frozen.
 RHO = 2700.0                   # kg/m^3, aluminium density
-SIDES = (0.13, 0.18, 0.02)     # m, the block edges (x, y, z)
+SIDES = (0.2, 0.15, 0.05)     # m, the block edges (x, y, z)
 CG_OFFSET = (0, 0, 0.02)   # m, <-- PLACEHOLDER, the CG offset vector (ox, oy, oz)
 PHASE_DEG = 0.0                # deg, <-- PLACEHOLDER, the slew angle of the maximum d
 SLEW_LIMIT_DEG = 30.0          # deg, the slew range of the mount
@@ -72,9 +72,9 @@ def axis_inertia(axis: int) -> float:
 # axis has its own perpendicular CG distance r_perp and its own inertia.
 # Value = (r_perp [m], I_axis [kg m^2]).
 AXES = {
-    "13 cm edge axis": (r_perp(0), axis_inertia(0)),  # axis along x
-    "18 cm edge axis": (r_perp(1), axis_inertia(1)),  # axis along y
-    "2 cm edge axis": (r_perp(2), axis_inertia(2)),   # axis along z
+    f"{SIDES[0]*100:.0f} cm edge axis": (r_perp(0), axis_inertia(0)),  # axis along x
+    f"{SIDES[1]*100:.0f} cm edge axis": (r_perp(1), axis_inertia(1)),  # axis along y
+    f"{SIDES[2]*100:.0f} cm edge axis": (r_perp(2), axis_inertia(2)),   # axis along z
 }
 # -------------------------------------------------------------------------
 

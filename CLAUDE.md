@@ -217,11 +217,21 @@ MMF coupling loss. It uses the `optical_link_budget` package (`olb`) from
 bridge gives two results:
 
 - The deterministic loss at the peak offset. The swept sine is zero to peak,
-  thus this is the primary result. It is the worst instantaneous coupling.
+  thus this is the primary result. It is the worst instantaneous coupling. The
+  loss has two mechanisms. The NA gate is a flat loss. It occurs when the
+  focusing cone `NA_optic = (D/2)/f` overfills the fibre NA. The walk-off loss
+  is the encircled-energy loss. It rises as the tilt moves the spot to the core
+  edge. The bridge shows the two mechanisms separately. The NA gate loss occurs
+  at zero tilt, thus angle suppression cannot remove it. A coupling budget below
+  the NA gate loss is not feasible at any tilt.
 - The statistical mean loss from `olb`. This is for comparison only. The `olb`
   package uses a per-axis 1-sigma Gaussian tilt and a Rayleigh offset. Our
   input is a deterministic swept sine, thus the statistic does not match. Do
-  not put `theta_pk / sqrt(2)` into `olb` and treat the result as correct.
+  not put `theta_pk / sqrt(2)` into `olb` and treat the result as correct. The
+  bridge uses `olb` in a receive-only way. It builds one receive terminal with
+  the MMF detector. It does not model the transmit side or the link, because we
+  care only about the incoming beam. The NA gate is now on in `olb` too, thus
+  the two paths agree.
 
 The bridge also inverts the loss. For a coupling-loss budget, it gives the
 necessary **angle suppression** at 13.2 Hz. This is the ratio of the bare-inertia
@@ -310,6 +320,7 @@ navantia_modelling/          # the package
 scripts/
   tier1_openloop_bound.py    # a frequency sweep, with an optional plot
   vibration_to_coupling.py   # the jitter-to-MMF-loss bridge (needs olb)
+  mmf_encircled_energy_figure.py  # a teaching figure of the MMF coupling model
 tests/
   test_tier1.py              # tests that are also a record of the physics
 docs/
