@@ -224,12 +224,18 @@ bridge gives two results:
   not put `theta_pk / sqrt(2)` into `olb` and treat the result as correct.
 
 The bridge also inverts the loss. For a coupling-loss budget, it gives the
-necessary attenuation at 13.2 Hz. This is the ratio of the bare-inertia bound to
-the largest tilt that the budget permits. It is the attenuation that the passive
-plant, and any Config B active optics, must already give. It is a **Tier 2
-requirement**: only the measured `P_dist` shows if the mount meets it. It is not
-a loop rejection, because there is no loop. The bridge does not invent `k_detent`
-or a sensitivity `S`.
+necessary **angle suppression** at 13.2 Hz. This is the ratio of the bare-inertia
+bound to the largest tilt that the budget permits. It is the angle suppression
+that the passive plant, and any Config B active optics, must already give. It is
+a **Tier 2 requirement**: only the measured `P_dist` shows if the mount meets it.
+It is not a loop rejection, because there is no loop. The bridge does not invent
+`k_detent` or a sensitivity `S`.
+
+The angle suppression is an **angle** quantity, not a received power. It uses the
+`20·log10` amplitude convention on a tilt ratio. The coupling loss and the budget
+use the `10·log10` convention on received optical power. The two share the unit
+dB but are different physics. A 3 dB power budget is not 3 dB of angle, because
+the encircled-energy map from angle to coupling is non-linear.
 
 When you write the closed-loop code, use this architecture:
 

@@ -244,24 +244,25 @@ def main() -> None:
             )
 
         # An axis with r_perp = 0 has no vibration torque. Thus it needs no
-        # attenuation, and the log ratio is undefined. Skip the inverse there.
-        print("  Inverse. The largest tilt for a loss budget, and the attenuation")
-        print("  that the passive plant must give at 13.2 Hz (a Tier 2 requirement):")
-        print("    budget [dB]   max theta_pk [urad]   max dx [um]   necessary attenuation [dB]")
+        # suppression, and the log ratio is undefined. Skip the inverse there.
+        print("  Inverse. The largest tilt for a loss budget, and the angle")
+        print("  suppression that the passive plant must give at 13.2 Hz (a Tier 2")
+        print("  requirement):")
+        print("    budget [dB]   max theta_pk [urad]   max dx [um]   req. angle suppression [dB, 20log]")
         for budget_db in (0.5, 1.0, 3.0):
             theta_max = max_tilt_for_loss(budget_db)
-            # The necessary attenuation is an ANGLE quantity, not a received
-            # power. It is the ratio of two tilt amplitudes (the bare-inertia
-            # bound over the largest allowed tilt) in the 20*log10 amplitude
+            # The angle suppression is an ANGLE quantity, not a received power.
+            # It is the ratio of two tilt amplitudes (the bare-inertia bound
+            # over the largest allowed tilt) in the 20*log10 amplitude
             # convention. The loss and budget columns are received optical
             # power in the 10*log10 convention. The two share the unit dB but
             # are different physics. A 3 dB power budget is NOT 3 dB of angle,
             # because the encircled-energy map from angle to coupling is
-            # non-linear. Do not read the attenuation as a power.
-            atten_db = 20.0 * np.log10(theta_pk_openloop / theta_max) if theta_pk_openloop > theta_max else 0.0
+            # non-linear. Do not read the angle suppression as a power.
+            angle_suppress_db = 20.0 * np.log10(theta_pk_openloop / theta_max) if theta_pk_openloop > theta_max else 0.0
             print(
                 f"    {budget_db:11.1f}   {theta_max*1e6:19.1f}   "
-                f"{theta_max*FOCAL_LENGTH_M*1e6:11.1f}   {atten_db:26.1f}"
+                f"{theta_max*FOCAL_LENGTH_M*1e6:11.1f}   {angle_suppress_db:34.1f}"
             )
 
         theta_rms = theta_pk_openloop / np.sqrt(2.0)
@@ -274,15 +275,15 @@ def main() -> None:
         )
         print()
 
-    print("  The necessary attenuation is a Tier 2 requirement. The passive detent")
-    print("  plant, and any Config B active optics, must give it. The mount is an")
-    print("  open-loop stepper, so this is not a loop rejection. Only the measured")
-    print("  P_dist shows if it is met. It is not a value we set. The worst axis")
-    print("  sets the requirement.")
+    print("  The necessary angle suppression is a Tier 2 requirement. The passive")
+    print("  detent plant, and any Config B active optics, must give it. The mount")
+    print("  is an open-loop stepper, so this is not a loop rejection. Only the")
+    print("  measured P_dist shows if it is met. It is not a value we set. The")
+    print("  worst axis sets the requirement.")
     print("  Note on the dB columns: the loss and the budget are received optical")
-    print("  power (10*log10). The necessary attenuation is an ANGLE amplitude")
-    print("  ratio (20*log10). The two are different physics. A 3 dB power budget")
-    print("  is not 3 dB of angle.")
+    print("  power (10*log10). The angle suppression is an ANGLE amplitude ratio")
+    print("  (20*log10). The two are different physics. A 3 dB power budget is not")
+    print("  3 dB of angle.")
 
     if args.plot:
         plot_bound_vs_acceptance()
