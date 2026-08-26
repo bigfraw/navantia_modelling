@@ -250,6 +250,14 @@ def main() -> None:
         print("    budget [dB]   max theta_pk [urad]   max dx [um]   necessary attenuation [dB]")
         for budget_db in (0.5, 1.0, 3.0):
             theta_max = max_tilt_for_loss(budget_db)
+            # The necessary attenuation is an ANGLE quantity, not a received
+            # power. It is the ratio of two tilt amplitudes (the bare-inertia
+            # bound over the largest allowed tilt) in the 20*log10 amplitude
+            # convention. The loss and budget columns are received optical
+            # power in the 10*log10 convention. The two share the unit dB but
+            # are different physics. A 3 dB power budget is NOT 3 dB of angle,
+            # because the encircled-energy map from angle to coupling is
+            # non-linear. Do not read the attenuation as a power.
             atten_db = 20.0 * np.log10(theta_pk_openloop / theta_max) if theta_pk_openloop > theta_max else 0.0
             print(
                 f"    {budget_db:11.1f}   {theta_max*1e6:19.1f}   "
@@ -271,6 +279,10 @@ def main() -> None:
     print("  open-loop stepper, so this is not a loop rejection. Only the measured")
     print("  P_dist shows if it is met. It is not a value we set. The worst axis")
     print("  sets the requirement.")
+    print("  Note on the dB columns: the loss and the budget are received optical")
+    print("  power (10*log10). The necessary attenuation is an ANGLE amplitude")
+    print("  ratio (20*log10). The two are different physics. A 3 dB power budget")
+    print("  is not 3 dB of angle.")
 
     if args.plot:
         plot_bound_vs_acceptance()
