@@ -63,7 +63,11 @@ from scipy.optimize import brentq
 # --- Add the repository root, the scripts directory, and the olb repository -
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, "D:/repos/optical_link_budget")
+# This script needs the olb commit effac02ea48669cc94a430dbf49fa27e27d4f37a.
+# A different olb version changes the coupling interface. Do not use another
+# commit until the NA limit lands in olb.
+# sys.path.insert(0, "D:/repos/optical_link_budget")
+sys.path.insert(0, "D:\\repos\\olb_TEMP\\optical_link_budget")# TEMP - add 'D:\repos\olb_TEMP\optical_link_budget' to path to import olb
 
 from navantia_modelling import (  # noqa: E402
     MassProperties,
@@ -81,6 +85,7 @@ from tier1_openloop_bound import (  # noqa: E402
     PHASE_DEG,
     SLEW_LIMIT_DEG,
 )
+
 from olb import (  # noqa: E402
     HorizontalPath,
     Terminal,
@@ -108,7 +113,7 @@ WAVELENGTH_M = 1550e-9  # m
 PATH_LENGTH_M = 1.0e3   # m,  the Phase 1 range
 TX_WAIST_M = 0.1      # m,  <-- PLACEHOLDER, the Gaussian waist radius
 
-CORE_RADIUS_M = 105e-6   # m,  <-- PLACEHOLDER, a 50 um core MMF
+CORE_RADIUS_M = 52.5e-6   # m,  <-- PLACEHOLDER, a 50 um core MMF
 FIBRE_NA = 0.20         # -,  <-- PLACEHOLDER, the fibre numerical aperture
 
 # The fibre NA sets the shortest focal length that the fibre accepts:
@@ -116,8 +121,8 @@ FIBRE_NA = 0.20         # -,  <-- PLACEHOLDER, the fibre numerical aperture
 # A short f gives a small movement at the tip for the same angle, because
 # dx = f * theta. Thus the shortest allowed f gives the best jitter tolerance.
 # The olb package does NOT model the NA limit, thus this script sets it here.
-FOCAL_LENGTH_M = APERTURE_M / (2.0 * FIBRE_NA)
-FOCAL_LENGTH_M = 2.27e-3 * 4 # 100 mm lens and 25 mm lens 
+F_NA_MIN_M = APERTURE_M / (2.0 * FIBRE_NA)  # the shortest f that the NA accepts
+FOCAL_LENGTH_M = 12.56e-3 * 4 # 100 mm lens and 25 mm lens
 
 # The focal spot radius, with the same equation that olb uses.
 SPOT_RADIUS_M = WAVELENGTH_M * FOCAL_LENGTH_M / (np.pi * (APERTURE_M / 2.0))
@@ -198,7 +203,14 @@ def main() -> None:
     print(f"  block mass m = {MASS:.4f} kg, CG offset vector = "
           f"({CG_OFFSET[0]*1e3:.0f}, {CG_OFFSET[1]*1e3:.0f}, {CG_OFFSET[2]*1e3:.0f}) mm (from tier1)")
     print(f"  aperture D = {APERTURE_M*1e3:.1f} mm, core radius a = {CORE_RADIUS_M*1e6:.1f} um")
-    print(f"  fibre NA = {FIBRE_NA}, thus f = D/(2 NA) = {FOCAL_LENGTH_M*1e3:.1f} mm")
+    print(f"  fibre NA = {FIBRE_NA}, effective f = {FOCAL_LENGTH_M*1e3:.1f} mm "
+          f"(NA minimum = {F_NA_MIN_M*1e3:.1f} mm)")
+    if FOCAL_LENGTH_M < F_NA_MIN_M:
+        # ponytail: a print warning only; the olb package will model the NA limit later
+        print(f"  WARNING: f is less than D/(2 NA) = {F_NA_MIN_M*1e3:.1f} mm. The cone "
+              f"overfills the fibre NA ({APERTURE_M/(2*FOCAL_LENGTH_M):.3f} > {FIBRE_NA}).")
+        print("  The olb model does not see this limit, thus the acceptance and the")
+        print("  coupling results are optimistic.")
     print(f"  focal spot radius w_s = {SPOT_RADIUS_M*1e6:.2f} um, thus the core is")
     print(f"  {CORE_RADIUS_M/SPOT_RADIUS_M:.1f} spot radii wide. The MMF has room to move.")
     print(f"  plate scale: {FOCAL_LENGTH_M:.4f} um of movement for each urad of tilt")
@@ -297,7 +309,7 @@ def plot_bound_vs_acceptance() -> None:
         ax.axhspan(theta_accept_urad, top, color="0.85", alpha=0.5, zorder=0)
         ax.axvline(spec.F_CROSS, ls="--", color="0.5", lw=1)
         ax.set_xlim(spec.F_LOW, spec.F_HIGH)
-        ax.set_ylim(1e2, top)
+        # ax.set_ylim(1e2, top)
         ax.set_title(f"{name}\nk = {k_mm:.0f} mm", fontsize=9)
         ax.set_xlabel("frequency [Hz]")
         ax.grid(True, which="both", alpha=0.3)
