@@ -41,8 +41,8 @@ The whole value of this skill is separating signal from churn. Be strict.
 **Synthesise (signal):**
 - New or changed physics, model equations, or approximations.
 - Anything that touches the **interface-ownership boundary** (see below) — most of
-  all, a **mount input actually arriving** (a real loop shape or compensator `C`),
-  which advances the tier ladder.
+  all, a **mount input actually arriving** (a measured torque→angle plant, a real
+  `k_detent`, or the detent resonance), which advances the tier ladder.
 - **Config A/B fork** movement: a fork resolved, or new fork-tagged divergence.
   This is high priority — the fork propagates into nearly every spec item.
 - A **placeholder becoming a committed value** (e.g. mass properties `m, d, I`
@@ -60,17 +60,20 @@ The whole value of this skill is separating signal from churn. Be strict.
 
 ## Interface-ownership discipline (do not let a change violate this)
 
-The model is split along the real WBS interface. **We own** the drive
-`tau=m·d·a(f)`, the mass properties `m,d,I`, and the plant `P=1/(I·s²)`. **The
-mount owns** the sensitivity `S=1/(1+C·P)`, the loop bandwidth/rejection, and the
-compensator `C`.
+The model is split along the real WBS interface. The mount is an open-loop
+stepper, not a servo, so there is no sensitivity function `S`, no loop gain, and
+no compensator `C`. **We own** the drive `tau=m·d·a(f)`, the mass properties
+`m,d,I`, and the payload inertia `I`. **The mount owns** the measured passive
+plant `P_dist=1/(I·s²+k_detent)`, the detent stiffness `k_detent` and resonance,
+the slip threshold, and the external angle metrology.
 
 When classifying a change, watch for the failure mode where a commit **fabricates
-a mount-owned block** to make a number appear — a hand-rolled compensator, an
-invented bandwidth, a guessed sensitivity curve. If you see one, do **not** fold
-it into the docs as fact. Flag it: "boundary event — is this a real mount input,
-or a stub standing in for one?" Only a genuinely-arrived mount input advances the
-tier ladder in the docs.
+a mount-owned block** to make a number appear — a guessed `k_detent`, an invented
+detent resonance, or a fabricated torque→angle plant. Also reject any return of
+the servo framing: an `S=1−H` bridge, a `P=L/C` back-out, or a three-tier ladder.
+If you see one, do **not** fold it into the docs as fact. Flag it: "boundary
+event — is this a real mount measurement, or a stub standing in for one?" Only a
+genuinely-arrived mount input advances the tier ladder in the docs.
 
 ## Procedure
 

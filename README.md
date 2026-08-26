@@ -9,38 +9,41 @@ this style when you change a file. Read `CLAUDE.md` before you write code.
 
 ## What the package calculates
 
-This is the disturbance chain for a servoed gimbal (pathway 3):
+The mount is an **open-loop stepper**, not a servoed gimbal. This is the
+disturbance chain (pathway 3), which reacts against a passive plant:
 
 ```
 base acceleration a(f) -> disturbance torque tau = m*d*a(f)
-                       -> the loop rejects the in-band part (sensitivity S)
+                       -> reacts against the passive rotor-on-detent plant
+                          P_dist = 1/(I*s^2 + k_detent)
                        -> the residual angle is the pointing jitter
 ```
 
 The vibration standard is a disturbance **input**. It is not a jitter output.
-The jitter is the result of that input and the sensitivity function of the
-tracking loop. The standard gives no data about the loop. Thus the model has a
-division at the interface:
+The jitter is the response of the passive plant to that input. There is no
+feedback loop and no sensitivity function `S`. The disturbance rejection is
+passive: the motor magnetic detent stiffness `k_detent`. The standard gives no
+data about the plant. Thus the model has a division at the interface:
 
 | We own (optomechanics, 1.3.2) | The mount owns (PAT, 1.3.1) |
 |---|---|
-| the drive `tau(f) = m*d*a(f)` | the sensitivity function `S = 1/(1+C·P)` |
-| the mass properties `m, d, I` (a range) | the loop bandwidth and the rejection against frequency |
-| the plant `P = 1/(I·s²)` | the compensator `C` |
+| the drive `tau(f) = m*d*a(f)` | the measured passive plant `P_dist = 1/(I·s² + k_detent)` |
+| the mass properties `m, d, I` (a range) | the detent stiffness `k_detent` and the detent resonance |
+| the payload inertia `I` | the external angle metrology for the measurement |
 
-### The three model tiers
+### The two model tiers
 
 | Tier | Necessary inputs | Result | Status |
 |---|---|---|---|
-| **1 — open-loop bound** | `tau(f)`, `I` (our data only) | the residual if the loop does nothing: `tau/I` with two integrations | **complete** |
-| **2 — input and rejection** | Tier 1, and the loop shape of the mount | the leakage of the disturbance | needs the Bode target of the mount |
-| **3 — full closed loop** | Tier 1, and the compensator `C` of the mount | the true residual, with the waterbed peak | needs the compensator of the mount |
+| **1 — bare-inertia bound** | `tau(f)`, `I` (our data only) | the response of a pure inertia: `tau/I` with two integrations | **complete** |
+| **2 — measured plant** | Tier 1, and the mount direct torque→angle measurement | the true `P_dist`, with the detent peak | needs a mount measurement |
 
-Tier 1 is the only tier that optomechanics can calculate alone. It is **exact
-above the loop bandwidth**, where the largest jitter occurs. It is
-**conservative below the loop bandwidth**. It is too small only in the narrow
-waterbed band immediately above crossover. Use Tier 2 or Tier 3 to get that
-peak.
+Tier 1 is the only tier that optomechanics can calculate alone. The bound
+direction flips at the detent resonance `√(k_detent/I)`. It is **conservative
+above the resonance**, where the inertia dominates. It is **non-conservative at
+and below the resonance**, because it drops `k_detent` and misses the peak. The
+resonance may sit inside the >13.2 Hz budget band, and it moves with the Config
+A/B mass decision. Only the Tier 2 measurement captures the peak.
 
 ## Layout
 
@@ -78,5 +81,5 @@ envelope.
 
 - **The internal flexure path.** The rigid-mass torque model does not show it.
 - **The atmospheric angle-of-arrival movement.** This is a different
-  disturbance into the same loop. It is the second part of the jitter budget,
-  and it has a link to WBS 1.5.3.
+  disturbance into the same pointing budget. It is the second part of the
+  jitter budget, and it has a link to WBS 1.5.3.

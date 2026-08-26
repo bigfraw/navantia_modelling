@@ -30,8 +30,9 @@ Obey these STE rules:
 - Write a maximum of six sentences in a paragraph.
 
 Technical names and technical verbs of this field are permitted. Examples:
-gimbal, sensitivity function, crossover, waterbed effect, phase screen. Give
-the definition of each technical name one time, then always use the same name.
+gimbal, feedforward response, crossover, detent stiffness, detent resonance,
+phase screen. Give the definition of each technical name one time, then always
+use the same name.
 
 When you change a file, write the new text in STE. Do not keep the old style in
 the file.
@@ -64,11 +65,17 @@ The repository contains two modelling threads:
    has no turbulence and no closed loop. See §6.
 
 This repository is the location of the code, the runs, the tests, and the
-commits. The derivation history, the specification decisions, and the design
-gate logic are in the owner's project workspace. They are also in two reference
-documents: `vibration_jitter_interface_note.md` and
-`claude_Optical_Terminal_Roadmap.md`. Use those two documents for physics
-questions. Use this file for operational questions.
+commits. The derivation history and the design gate logic are in the owner's
+project workspace and in `claude_Optical_Terminal_Roadmap.md`. The interface
+physics now lives in the repository, in `docs/interfaces/`. Use those documents
+for physics questions. Use this file for operational questions.
+
+The `docs/interfaces/` directory holds four notes. They record the mount
+correction. The mount is an open-loop stepper, not a servo. See §2 and §3.
+- `control_loop_variables_note.md`: the command-path variables.
+- `vibration_jitter_interface_note.md`: the passive-detent plant and the tiers.
+- `mount_team_proposal_plant_separation.md`: the converged interface.
+- `mount_review_reply.md`: the reply that accepts the correction.
 
 ---
 
@@ -76,16 +83,24 @@ questions. Use this file for operational questions.
 
 **A vibration specification is a disturbance input. It is not a jitter
 output.** The standard gives the base acceleration that the terminal receives.
-The jitter is the result of that input and the sensitivity function of the
-tracking loop. The standard gives no data about the tracking loop. Thus you
-cannot get the jitter from the vibration standard alone. Prevent this error in
-the code and in the comments.
+The jitter is the response of the passive disturbance plant to that input. The
+standard gives no data about the plant. Thus you cannot get the jitter from the
+vibration standard alone. Prevent this error in the code and in the comments.
 
-This is the chain for a servoed gimbal:
+**The mount is an open-loop stepper, not a servoed gimbal.** The FLIR D48E is a
+feedforward profile generator plus open-loop step execution. No block reads
+angle error and drives a correcting torque. Thus there is no sensitivity
+function `S`, no loop gain `L`, and no compensator `C`. The disturbance
+rejection is passive. It is the motor magnetic detent stiffness `k_detent`, a
+spring. See `docs/interfaces/control_loop_variables_note.md` for the full
+correction record.
+
+This is the chain:
 
 ```
-base acceleration a(f) -> disturbance torque tau = m*d*a(f)
-                       -> the loop rejects the in-band part (sensitivity S)
+base acceleration a(f) -> disturbance torque tau = m*r_perp*a(f)
+                       -> reacts against the passive rotor-on-detent plant
+                          P_dist = 1/(I*s^2 + k_detent)
                        -> the residual angle is the pointing jitter
 ```
 
@@ -99,34 +114,39 @@ Request those inputs. Do not invent them.
 
 | We own (optomechanics, 1.3.2) | The mount owns (PAT, 1.3.1) |
 |---|---|
-| the drive `tau(f) = m*d*a(f)` | the sensitivity `S = 1/(1 + C·P)` |
-| the mass properties `m, d, I` (a **range**, not one value) | the loop bandwidth and the rejection against frequency |
-| the plant `P = 1/(I·s²)` | the compensator `C` |
-| the lever arm `d` in the pointing range | the residual tracking error (the jitter value) |
+| the drive `tau(f) = m*d*a(f)` | the measured passive plant `P_dist = 1/(I·s² + k_detent)` |
+| the mass properties `m, d, I` (a **range**, not one value) | the detent stiffness `k_detent` and the detent resonance `√(k_detent/I)` |
+| the lever arm `d` in the pointing range | the slip threshold and the near-null non-linear behaviour |
+| the payload inertia `I` (sets the inertia term) | the external angle metrology for the measurement |
 
-If a task needs `S`, the loop shape, or `C`, then that value is a **mount
-input**. Write a stub for the interface. Record the dependency. Do not invent a
-compensator to get a value.
+If a task needs `k_detent`, the detent resonance, or the measured torque→angle
+response, then that value is a **mount input**. It comes from a direct
+torque-injection measurement, not from any controller model. There is no
+controller. Write a stub for the interface. Record the dependency. Do not invent
+a stiffness or a plant to get a value.
 
 ---
 
-## 4. The three model tiers (jitter thread)
+## 4. The two model tiers (jitter thread)
+
+The old three-tier ladder had a Tier 2 loop shape and a Tier 3 compensator `C`.
+Neither exists, because there is no loop. The ladder now has two rungs.
 
 | Tier | Necessary inputs | Result | Status |
 |---|---|---|---|
-| **1 — open-loop bound** | `tau(f)`, `I` (our data only) | the residual if the loop does nothing: `tau/I` with two integrations | **complete** (`jitter.openloop_bound`) |
-| **2 — input and rejection** | Tier 1, and the loop shape or the Bode target of the mount | the leakage of the disturbance against frequency | needs a mount input |
-| **3 — full closed loop** | Tier 1, and the compensator `C` of the mount | the true residual from `S`, with the waterbed peak | needs a mount input |
+| **1 — bare-inertia bound** | `tau(f)`, `I` (our data only) | the response of a pure inertia: `tau/I` with two integrations | **complete** (`jitter.openloop_bound`) |
+| **2 — measured plant** | Tier 1, and the mount direct torque→angle measurement | the true `P_dist`, with the detent peak | needs a mount input |
 
-The accuracy of Tier 1:
+The accuracy of Tier 1 (the bound direction flips at the detent resonance):
 
-- **Above the loop bandwidth, Tier 1 is exact.** The largest jitter occurs in
-  this band.
-- **Below the loop bandwidth, Tier 1 is conservative.** The bound is larger
-  than the true value.
-- **Immediately above crossover, Tier 1 is too small.** The true sensitivity
-  `S` is more than 1 in this narrow band. This is the waterbed effect. Only
-  Tier 2 and Tier 3 show this peak.
+- **Above the detent resonance `√(k_detent/I)`, Tier 1 is conservative.** There
+  the inertia term dominates and `tau/I` is a good, safe bound.
+- **At and below the detent resonance, Tier 1 is NON-conservative.** Tier 1
+  drops `k_detent`, thus it misses the resonant peak and under-predicts the
+  jitter. This is the reverse of the old waterbed caution. Flag it loudly.
+- **The detent resonance may sit inside the >13.2 Hz budget band.** It moves
+  with `I`, thus it moves with the Config A/B mass decision. Only the Tier 2
+  measurement captures the peak.
 
 Give this accuracy statement with each Tier 1 result that you supply as a
 bound.
@@ -135,37 +155,39 @@ bound.
 
 ## 5. Physics facts. Do not violate them
 
-- **Below crossover, the open-loop bound is constant.** The term
+- **The Tier 1 bare-inertia bound is constant below crossover.** The term
   `a = (2πf)²·x` removes the two integrations. Thus `theta = m·d·x0/I`. This
   value does not change with frequency between 2 Hz and 13.2 Hz. Above
-  crossover the torque is constant and the angle decreases as `1/f²`. Thus the
-  open-loop peak is at a low frequency. But the closed-loop maximum stays at a
-  high frequency. The loop decreases the low-frequency plateau and does not
-  change the high band.
-- **High-frequency jitter occurs because the loop bandwidth is too low.** It
-  does not occur because the motor torque is too low. Above the bandwidth the
-  controller stops the correction commands. The necessary torque increases with
-  `f²`, but the loop does not respond. Do not model the high-band failure as a
-  torque limit.
-- **Inertia does not decrease the jitter at high frequency.** The inertia `I`
-  opposes the disturbance torque and the correction torque by the same
-  quantity. The inertia is a low-pass filter on the angular response. It is not
-  additional loop rejection.
-- **`tau/I` is the limit of the correct plant `I·s² + c·s + k`, when `c` and
-  `k` decrease to zero.** The terms `c` and `k` are the bearing friction, the
-  back-EMF damping, and the detent stiffness or cable stiffness. In the high
-  band the inertia term is much larger than `c` and `k`. Thus the bound is
-  conservative in that band. There is one exception. Detent torque and Coulomb
-  friction are non-linear. They can add torque ripple at the small residual
-  angles that a fibre-coupling budget uses. Thus they are also a disturbance
-  source, and not only a loss. Report this to the mount. The values of `c` and
-  `k` are mount inputs.
+  crossover the torque is constant and the bare-inertia angle decreases as
+  `1/f²`. This is the shape of a pure inertia. It is not the real plant. The
+  real plant `P_dist = 1/(I·s² + k_detent)` is flat and small below the detent
+  resonance, peaks at the resonance, and rolls off as `1/(I·s²)` above it.
+- **High-frequency jitter occurs because the passive plant rolls off late.** It
+  does not occur because the motor torque is too low, and there is no loop
+  bandwidth to blame. Below the detent resonance the spring holds the residual
+  small. Above the resonance the inertia dominates and the residual falls. The
+  worst jitter sits where the disturbance energy and the plant response meet.
+  Do not model the high-band jitter as a torque limit or a loop failure.
+- **Inertia does not decrease the jitter at high frequency by rejection.** The
+  inertia `I` is a low-pass filter on the angular response. It resists the
+  disturbance torque. It is not a controller and not active rejection. There is
+  no correction torque, because there is no loop.
+- **`tau/I` is the `k_detent → 0` limit of the real plant `I·s² + k_detent`.**
+  The detent stiffness `k_detent` is the motor magnetic holding spring. It is
+  the PRIMARY passive rejection, not a small correction term. Below the detent
+  resonance `√(k_detent/I)` the stiffness dominates and `tau/I` over-predicts
+  the displacement but misses the resonant peak. Above the resonance the
+  inertia dominates and `tau/I` is a good bound again. The detent torque and
+  the Coulomb friction are also non-linear at the small residual angles that a
+  fibre-coupling budget uses. Thus they add torque ripple and are a disturbance
+  source, not only a loss. The value of `k_detent` is a mount input. It must be
+  measured, because FLIR does not specify it.
 - **The lever arm `d` is a range of values, not one value.** A slew moves the
   centre of gravity in relation to the axis. Thus `tau` is also a range of
   values in the pointing envelope. The ship attitude does not change `d`,
   because the rigid mass turns as one body. Only a gimbal slew changes `d`. In
-  closed-loop tracking, the ship roll causes the slew that corrects the roll.
-  Thus `d` changes with the state during a roll cycle.
+  closed tracking, the ship roll drives the slew that corrects the roll. Thus
+  `d` changes with the state during a roll cycle.
 - **The CG offset is a vector, not one distance.** The offset from the gimbal
   centre to the centre of gravity is a 3-vector `(ox, oy, oz)`. Each gimbal
   axis sees only the part perpendicular to it. Thus each axis has its own arm
@@ -202,9 +224,12 @@ bridge gives two results:
   not put `theta_pk / sqrt(2)` into `olb` and treat the result as correct.
 
 The bridge also inverts the loss. For a coupling-loss budget, it gives the
-necessary loop rejection at 13.2 Hz. This rejection is a **Tier 2 requirement
-on the mount**. It is not a value we set. The bridge does not invent the loop
-sensitivity `S`.
+necessary attenuation at 13.2 Hz. This is the ratio of the bare-inertia bound to
+the largest tilt that the budget permits. It is the attenuation that the passive
+plant, and any Config B active optics, must already give. It is a **Tier 2
+requirement**: only the measured `P_dist` shows if the mount meets it. It is not
+a loop rejection, because there is no loop. The bridge does not invent `k_detent`
+or a sensitivity `S`.
 
 When you write the closed-loop code, use this architecture:
 
@@ -238,8 +263,9 @@ When you write the closed-loop code, use this architecture:
   set this value in the code.
 
 The atmospheric angle-of-arrival movement is the second part of the jitter
-budget. It has a link to WBS 1.5.3. It is an input to the same tracking loop as
-the vibration disturbance.
+budget. It has a link to WBS 1.5.3. It is an input to the same pointing budget
+as the vibration disturbance, and to the same Config B fine-steering loop in
+this simulation.
 
 ---
 
@@ -280,6 +306,9 @@ scripts/
   vibration_to_coupling.py   # the jitter-to-MMF-loss bridge (needs olb)
 tests/
   test_tier1.py              # tests that are also a record of the physics
+docs/
+  interfaces/                # the four mount-interface notes (physics of record)
+  synthesis-log.md           # the repo-change-synthesis log
 ```
 
 The block, the CG offset vector, and the axis inertias live in

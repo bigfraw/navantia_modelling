@@ -1,29 +1,31 @@
-"""The Tier 1 open-loop jitter bound.
+"""The Tier 1 bare-inertia jitter bound.
 
-This module models the payload as a pure inertia P = 1/(I s^2), and the loop
-does nothing (the sensitivity S is 1). The residual angle is the disturbance
-torque with two integrations against the inertia alone:
+The mount is an open-loop stepper, not a servoed gimbal. There is no feedback
+loop and no sensitivity function. This module models the payload as a PURE
+INERTIA P = 1/(I s^2), which drops the passive detent stiffness. The residual
+angle is the disturbance torque with two integrations against the inertia alone:
 
     theta(f) = tau(f) / (I * (2*pi*f)^2)
              = m * d * a(f) / (I * (2*pi*f)^2)
 
-The accuracy, from the interface note:
-  - EXACT above the loop bandwidth. There S is 1, and the largest jitter
-    occurs there.
-  - CONSERVATIVE below the bandwidth. There the true loop cancels the larger
-    part of tau.
-  - TOO SMALL in the narrow waterbed band immediately above crossover. There
-    the true sensitivity is more than 1. Only Tier 2 and Tier 3 give that peak.
+The accuracy flips sign at the detent resonance sqrt(k_detent/I), from the
+interface note:
+  - CONSERVATIVE above the detent resonance. There the inertia term dominates,
+    and tau/I is a good, safe bound.
+  - NON-CONSERVATIVE at and below the detent resonance. This bound drops
+    k_detent, thus it misses the resonant peak and under-predicts the jitter.
+    The resonance may sit inside the >13.2 Hz budget band, and it moves with the
+    Config A/B mass decision. Only the Tier 2 measurement gives that peak.
 
-Plant idealisation: tau/I is the limit of the correct open-loop plant
-I s^2 + c s + k, when c and k decrease to zero. The terms c and k are the
-bearing friction, the back-EMF damping, and the detent stiffness or cable
-stiffness. These terms increase as k, c*w, and I*w^2. In the high band the
-inertia term is much larger, and the high band sets the budget. Thus it is
-conservative to remove c and k there. There is one exception. The detent
-torque and the Coulomb friction are non-linear. They can ADD torque ripple at
-small residual angles. Report this to the mount for a calculation. The terms c
-and k are in the hardware of the mount, thus the values are mount inputs.
+Plant idealisation: tau/I is the k_detent -> 0 limit of the real plant
+I s^2 + k_detent. The detent stiffness k_detent is the motor magnetic holding
+spring. It is the PRIMARY passive rejection, not a small correction term. Below
+the detent resonance the stiffness dominates and holds the residual small. Above
+it the inertia term I*w^2 dominates and the bound is good again. The detent
+torque and the Coulomb friction are non-linear at the small residual angles that
+a fibre-coupling budget uses. Thus they ADD torque ripple and are a disturbance
+source, not only a loss. Report this to the mount. The value of k_detent is a
+mount input. It must be measured, because FLIR does not specify it.
 """
 from __future__ import annotations
 
@@ -52,10 +54,11 @@ def displacement_band_bound(mp: MassProperties) -> float:
         theta = m * d * x0 / I
 
     This is a constant plateau from 2 Hz to 13.2 Hz. Above crossover the torque
-    is constant, and the bound decreases as 1/f^2. Thus the maximum open-loop
-    angle is at a low frequency. This is the OPEN-loop peak. The closed-loop
-    maximum stays at a high frequency, because the loop decreases this
-    low-frequency plateau but does not change the high band.
+    is constant, and the bare-inertia bound decreases as 1/f^2. Thus the maximum
+    bare-inertia angle is at a low frequency. This is the shape of a pure
+    inertia. The real plant is different. The passive detent stiffness holds the
+    plateau smaller and adds a resonant peak at sqrt(k_detent/I). The Tier 2
+    measurement gives the real shape.
     """
     return mp.mass * mp.lever_arm * spec.DISP_AMP / mp.inertia
 

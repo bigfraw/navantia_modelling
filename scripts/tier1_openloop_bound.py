@@ -113,13 +113,15 @@ def main() -> None:
               f"peak {peak.min():.1f} to {peak.max():.1f} urad")
         print()
 
-    print("How to read this: the bound is constant below 13.2 Hz. Above 13.2 Hz")
-    print("it decreases as 1/f^2. This is the OPEN-loop peak, at a low frequency.")
-    print("The closed-loop maximum stays at a high frequency, because the loop")
-    print("decreases the low plateau but does not change the high band.")
-    print("Bound direction: the high band is EXACT. The plateau is CONSERVATIVE.")
-    print("The narrow band above crossover is TOO SMALL, because of the waterbed")
-    print("peak. Only Tier 2 and Tier 3 show that peak.")
+    print("How to read this: the bare-inertia bound is constant below 13.2 Hz.")
+    print("Above 13.2 Hz it decreases as 1/f^2. This is the shape of a pure")
+    print("inertia, not the real plant. The mount is an open-loop stepper, so the")
+    print("real plant is 1/(I*s^2 + k_detent): flat and small below the detent")
+    print("resonance sqrt(k_detent/I), a peak at it, and 1/(I*s^2) above it.")
+    print("Bound direction: CONSERVATIVE above the detent resonance, where the")
+    print("inertia dominates. NON-CONSERVATIVE at and below it, because this bound")
+    print("drops k_detent and misses the peak. Only the Tier 2 measurement shows")
+    print("that peak. The resonance may sit inside the >13.2 Hz budget band.")
 
     if args.plot:
         try:

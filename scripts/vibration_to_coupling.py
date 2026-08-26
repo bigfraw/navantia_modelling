@@ -244,16 +244,16 @@ def main() -> None:
             )
 
         # An axis with r_perp = 0 has no vibration torque. Thus it needs no
-        # rejection, and the log ratio is undefined. Skip the inverse there.
-        print("  Inverse. The largest tilt for a loss budget, and the rejection")
-        print("  that the mount must give at 13.2 Hz (a Tier 2 requirement):")
-        print("    budget [dB]   max theta_pk [urad]   max dx [um]   necessary rejection [dB]")
+        # attenuation, and the log ratio is undefined. Skip the inverse there.
+        print("  Inverse. The largest tilt for a loss budget, and the attenuation")
+        print("  that the passive plant must give at 13.2 Hz (a Tier 2 requirement):")
+        print("    budget [dB]   max theta_pk [urad]   max dx [um]   necessary attenuation [dB]")
         for budget_db in (0.5, 1.0, 3.0):
             theta_max = max_tilt_for_loss(budget_db)
-            rejection_db = 20.0 * np.log10(theta_pk_openloop / theta_max) if theta_pk_openloop > theta_max else 0.0
+            atten_db = 20.0 * np.log10(theta_pk_openloop / theta_max) if theta_pk_openloop > theta_max else 0.0
             print(
                 f"    {budget_db:11.1f}   {theta_max*1e6:19.1f}   "
-                f"{theta_max*FOCAL_LENGTH_M*1e6:11.1f}   {rejection_db:24.1f}"
+                f"{theta_max*FOCAL_LENGTH_M*1e6:11.1f}   {atten_db:26.1f}"
             )
 
         theta_rms = theta_pk_openloop / np.sqrt(2.0)
@@ -266,8 +266,11 @@ def main() -> None:
         )
         print()
 
-    print("  The necessary rejection is a Tier 2 requirement on the mount. It is")
-    print("  not a value we set. The worst axis sets the requirement.")
+    print("  The necessary attenuation is a Tier 2 requirement. The passive detent")
+    print("  plant, and any Config B active optics, must give it. The mount is an")
+    print("  open-loop stepper, so this is not a loop rejection. Only the measured")
+    print("  P_dist shows if it is met. It is not a value we set. The worst axis")
+    print("  sets the requirement.")
 
     if args.plot:
         plot_bound_vs_acceptance()
