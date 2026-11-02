@@ -9,8 +9,9 @@ and adds the sky background, the dark current, and the read noise. It then
 solves for the transmit power that gives the target SNR in the PEAK pixel.
 
 The camera is the NIT WiDy SenS 320V-ST (datasheet V1.3). The script runs
-both CTIA gain modes. The lens, the filter, the dark current, and the margins
-are PLACEHOLDERS. The "day" case is a MEGA-SAFE background: a sunlit white
+both CTIA gain modes. The dark current at 25 C and the low-gain well and read
+noise are MEASURED on this camera. The lens, the filter, and the margins are
+PLACEHOLDERS. The "day" case is a MEGA-SAFE background: a sunlit white
 cloud (Lambertian, full sea-level solar irradiance) fills the pixel. The direct
 sun or a sun glint in the pixel is a separate exclusion.
 
@@ -46,10 +47,16 @@ PIXEL_M = 15e-6          # m, the pixel pitch
 N_PIX = (320, 256)       # the sensor format
 QE = 0.70                # the datasheet gives "> 70 %"
 # CTIA gain modes: (full well [e-], read noise [e- rms])
+# High gain: datasheet. Low gain: MEASURED on this camera (Lin/Itr, Analog Gain
+# Low, CDS off, 160 MHz), handover_beacon_P1_20261030_dark, at g = 23.6 e-/count
+# (range 22.7 to 28.5). The well is the linear range: raw 10,750 minus the
+# 1,641 offset. The datasheet 380 ke- is the ADC full scale, not the well.
 MODES = {"CTIA high gain (CDS)": (17e3, 50.0),
-         "CTIA low gain": (380e3, 270.0)}
+         "CTIA low gain": (215e3, 203.0)}
 T_MIN_S, T_MAX_S = 10e-6, 1e-3   # s, the minimum exposure; 1 ms keeps 1 kHz frames
-DARK_REF_E_S = 1e5      # e-/s/pixel at 25 C, <-- PLACEHOLDER, NOT in the datasheet. Ask NIT.
+# MEASURED: the factory lens-capped dark tables at 25 C (160MHz/LIN/Low), the
+# median pixel slope. The capped run of 2026-10-30 gave 3.3e4. Pixel p90: 6.5e4.
+DARK_REF_E_S = 3.0e4    # e-/s/pixel at 25 C
 # The TEC holds the sensor 15 C below the housing (datasheet). A hot deck in
 # the sun can put the housing at the 65 C operating limit.
 HOUSING_T_C = 60.0       # C, <-- PLACEHOLDER, the worst-case housing temperature
@@ -57,6 +64,7 @@ TEC_DELTA_C = 15.0       # C, the datasheet cooling capacity
 SENSOR_T_C = HOUSING_T_C - TEC_DELTA_C
 # InGaAs dark current is diffusion-limited near room temperature:
 # I ~ T^3 exp(-Eg / kT), Eg = 0.74 eV (Rogalski, DOI 10.1201/b10319).
+# <-- THEORY: no temperature sweep was measured (test plan, Test A).
 _EG_EV, _K_EV = 0.74, 8.617e-5
 _T1, _T0 = SENSOR_T_C + 273.15, 298.15
 DARK_E_S = DARK_REF_E_S * (_T1 / _T0) ** 3 * np.exp(-_EG_EV / _K_EV * (1 / _T1 - 1 / _T0))
@@ -223,7 +231,7 @@ def main() -> None:
     print(f"  filter {FILTER_FWHM_UM*1e3:g} nm x {T_FILTER}, optics {T_OPTICS} "
           f"-> {-10*np.log10(T_FILTER*T_OPTICS):.1f} dB")
     print(f"  sensor {SENSOR_T_C:.0f} C (housing {HOUSING_T_C:.0f} C - TEC {TEC_DELTA_C:.0f} C): dark "
-          f"{DARK_E_S:.2g} e-/s = {DARK_E_S/DARK_REF_E_S:.1f}x the 25 C value (PLACEHOLDER)")
+          f"{DARK_E_S:.2g} e-/s = {DARK_E_S/DARK_REF_E_S:.1f}x the measured 25 C value (temperature law is THEORY)")
     print(f"  margins: extinction {EXT_DB_KM:.2f} dB/km, fade {FADE_MARGIN_DB:g} dB, "
           f"extra {EXTRA_MARGIN_DB:g} dB; the mispointing loss is per divergence")
     for z in RANGES_M:
