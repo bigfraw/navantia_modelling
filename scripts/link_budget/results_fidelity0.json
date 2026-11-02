@@ -1,0 +1,665 @@
+{
+  "b9_1in_circle_cn21e-15": {
+    "rytov": 1.3564214324334551,
+    "f0_bucket": [
+      35.640683866467185,
+      42.981787622787834
+    ],
+    "f2_bucket": [
+      35.72357829812164,
+      45.06664020187328
+    ],
+    "f0_fibre": [
+      36.832406259737844,
+      44.19149082161401
+    ],
+    "f2_fibre": [
+      36.987384871671104,
+      46.52328800126459
+    ],
+    "f0_coupling_mean": 1.191722393270659,
+    "f2_coupling_mean": 1.2638065735494663,
+    "f0_terms": {
+      "geometric spreading": 35.63681396395262,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 0.8856312399850667,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b9_1in_circle_cn25e-15": {
+    "rytov": 6.782107162167275,
+    "f0_bucket": [
+      35.643229477777275,
+      49.74514365745725
+    ],
+    "f2_bucket": [
+      35.71434327316469,
+      49.42725909750647
+    ],
+    "f0_fibre": [
+      36.85585764166398,
+      50.911179498930366
+    ],
+    "f2_fibre": [
+      36.984546442185476,
+      51.02568048699998
+    ],
+    "f0_coupling_mean": 1.2126281638867056,
+    "f2_coupling_mean": 1.270203169020789,
+    "f0_terms": {
+      "geometric spreading": 35.63681396395262,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 2.731414327055465,
+      "receive coupling (MMF)": 1.2066265776432836
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b9_1in_circle_cn21e-14": {
+    "rytov": 13.56421432433455,
+    "f0_bucket": [
+      35.6420652532436,
+      53.01762771467796
+    ],
+    "f2_bucket": [
+      36.47441340331584,
+      49.00797474759463
+    ],
+    "f0_fibre": [
+      36.862444724862186,
+      54.22314148735683
+    ],
+    "f2_fibre": [
+      37.76943315940761,
+      50.16183409554771
+    ],
+    "f0_coupling_mean": 1.2203794716185854,
+    "f2_coupling_mean": 1.2950197560917687,
+    "f0_terms": {
+      "geometric spreading": 35.63681396395262,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 3.9036705631488333,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b18_1in_circle_cn21e-15": {
+    "rytov": 1.3564214324334551,
+    "f0_bucket": [
+      30.870269821021292,
+      37.978598676138766
+    ],
+    "f2_bucket": [
+      31.13255022241912,
+      39.926344453484745
+    ],
+    "f0_fibre": [
+      30.877247637713392,
+      37.9522659670995
+    ],
+    "f2_fibre": [
+      31.20485260864622,
+      39.99538675643296
+    ],
+    "f0_coupling_mean": 0.006977816692099736,
+    "f2_coupling_mean": 0.07230238622710061,
+    "f0_terms": {
+      "geometric spreading": 29.411425382535548,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.4602259990161244,
+      "scintillation": 0.8347197046648731,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b18_1in_circle_cn25e-15": {
+    "rytov": 6.782107162167275,
+    "f0_bucket": [
+      30.864080643715262,
+      44.602543544419305
+    ],
+    "f2_bucket": [
+      31.784696226218543,
+      45.58154578459818
+    ],
+    "f0_fibre": [
+      30.871584147204423,
+      44.53774948862482
+    ],
+    "f2_fibre": [
+      31.85784651132731,
+      45.6672391237802
+    ],
+    "f0_coupling_mean": 0.0075035034891612895,
+    "f2_coupling_mean": 0.07315028510876687,
+    "f0_terms": {
+      "geometric spreading": 29.411425382535548,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.4602259990161244,
+      "scintillation": 2.621125744700929,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b18_1in_circle_cn21e-14": {
+    "rytov": 13.56421432433455,
+    "f0_bucket": [
+      30.843752564328085,
+      48.00667692931991
+    ],
+    "f2_bucket": [
+      32.60546495956114,
+      46.76416905745201
+    ],
+    "f0_fibre": [
+      30.84640922756865,
+      47.94422693667848
+    ],
+    "f2_fibre": [
+      32.6752016791366,
+      46.84632275426281
+    ],
+    "f0_coupling_mean": 0.002656663240564683,
+    "f2_coupling_mean": 0.06973671957545946,
+    "f0_terms": {
+      "geometric spreading": 29.411425382535548,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.4602259990161244,
+      "scintillation": 3.7745561913418655,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b18_2in_circle_cn21e-15": {
+    "rytov": 1.3564214324334551,
+    "f0_bucket": [
+      23.60133233308411,
+      30.202461185555034
+    ],
+    "f2_bucket": [
+      23.885691114270116,
+      31.82725265544625
+    ],
+    "f0_fibre": [
+      24.811668720220638,
+      31.407717761480402
+    ],
+    "f2_fibre": [
+      25.150415368847394,
+      33.153438950554914
+    ],
+    "f0_coupling_mean": 1.210336387136529,
+    "f2_coupling_mean": 1.2647242545772777,
+    "f0_terms": {
+      "geometric spreading": 23.60564156688753,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 0.7329456016599671,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b18_2in_circle_cn25e-15": {
+    "rytov": 6.782107162167275,
+    "f0_bucket": [
+      23.614150477003744,
+      36.62175457908622
+    ],
+    "f2_bucket": [
+      24.70415363788049,
+      37.09893868180589
+    ],
+    "f0_fibre": [
+      24.81473057901484,
+      37.81935107892336
+    ],
+    "f2_fibre": [
+      25.960136963270006,
+      38.904513862208184
+    ],
+    "f0_coupling_mean": 1.200580102011095,
+    "f2_coupling_mean": 1.255983325389515,
+    "f0_terms": {
+      "geometric spreading": 23.60564156688753,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 2.3909817920568606,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b18_2in_circle_cn21e-14": {
+    "rytov": 13.56421432433455,
+    "f0_bucket": [
+      23.57518363211461,
+      39.949498830839595
+    ],
+    "f2_bucket": [
+      25.766550691179432,
+      38.505932757354
+    ],
+    "f0_fibre": [
+      24.819306945589304,
+      41.19049531007533
+    ],
+    "f2_fibre": [
+      27.026890783702477,
+      39.91858473334015
+    ],
+    "f0_coupling_mean": 1.2441233134746952,
+    "f2_coupling_mean": 1.2603400925230446,
+    "f0_terms": {
+      "geometric spreading": 23.60564156688753,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 3.501299048810174,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b36_2in_circle_cn21e-15": {
+    "rytov": 1.3564214324334551,
+    "f0_bucket": [
+      18.925555221317275,
+      25.055096805611157
+    ],
+    "f2_bucket": [
+      19.522198321893253,
+      26.772996827904922
+    ],
+    "f0_fibre": [
+      18.930318649365308,
+      25.024981133222035
+    ],
+    "f2_fibre": [
+      19.627401160286254,
+      26.87586574423978
+    ],
+    "f0_coupling_mean": 0.0047634280480330915,
+    "f2_coupling_mean": 0.10520283839300149,
+    "f0_terms": {
+      "geometric spreading": 17.63144158521311,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.2977892161941504,
+      "scintillation": 0.639265298472555,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b36_2in_circle_cn25e-15": {
+    "rytov": 6.782107162167275,
+    "f0_bucket": [
+      18.929297920673417,
+      31.197709690506247
+    ],
+    "f2_bucket": [
+      21.657076115467838,
+      34.331444230916155
+    ],
+    "f0_fibre": [
+      18.93630904694161,
+      31.17659676951347
+    ],
+    "f2_fibre": [
+      21.762702949072885,
+      34.53300060945205
+    ],
+    "f0_coupling_mean": 0.007011126268192669,
+    "f2_coupling_mean": 0.10562683360504721,
+    "f0_terms": {
+      "geometric spreading": 17.63144158521311,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.2977892161941504,
+      "scintillation": 2.166090982190703,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b36_2in_circle_cn21e-14": {
+    "rytov": 13.56421432433455,
+    "f0_bucket": [
+      18.935861188930293,
+      34.43969622475718
+    ],
+    "f2_bucket": [
+      22.943299575573015,
+      37.17014150779789
+    ],
+    "f0_fibre": [
+      18.90559413285645,
+      34.46448789561019
+    ],
+    "f2_fibre": [
+      23.055569023822446,
+      37.349754093983115
+    ],
+    "f0_coupling_mean": -0.030267056073842724,
+    "f2_coupling_mean": 0.11226944824943175,
+    "f0_terms": {
+      "geometric spreading": 17.63144158521311,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.2977892161941504,
+      "scintillation": 3.228637343029607,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": [
+      "receive coupling (MMF)",
+      "scintillation"
+    ]
+  },
+  "b9_1in_circle_L1km_cn21e-15": {
+    "rytov": 0.019909543851127042,
+    "f0_bucket": [
+      15.702368101883826,
+      16.3516292953387
+    ],
+    "f2_bucket": [
+      15.71665873313364,
+      16.32833777332139
+    ],
+    "f0_fibre": [
+      16.909014728402738,
+      17.55278288393148
+    ],
+    "f2_fibre": [
+      16.970883264875813,
+      17.602400883018383
+    ],
+    "f0_coupling_mean": 1.2066466265189124,
+    "f2_coupling_mean": 1.2542245317421727,
+    "f0_terms": {
+      "geometric spreading": 15.702791788332283,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 0.008635239444243726,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)"
+    ]
+  },
+  "b9_1in_circle_L1km_cn25e-15": {
+    "rytov": 0.09954771925563521,
+    "f0_bucket": [
+      15.702051619408941,
+      17.170159453083148
+    ],
+    "f2_bucket": [
+      15.748777621488605,
+      17.22222306293332
+    ],
+    "f0_fibre": [
+      16.90994692281551,
+      18.372032284883662
+    ],
+    "f2_fibre": [
+      16.992395488940108,
+      18.53133609280989
+    ],
+    "f0_coupling_mean": 1.2078953034065698,
+    "f2_coupling_mean": 1.243617867451503,
+    "f0_terms": {
+      "geometric spreading": 15.702791788332283,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 0.042836844564499765,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)"
+    ]
+  },
+  "b9_1in_circle_L1km_cn21e-14": {
+    "rytov": 0.19909543851127043,
+    "f0_bucket": [
+      15.700305855226206,
+      17.77569789759734
+    ],
+    "f2_bucket": [
+      15.77375238533595,
+      17.87930913980518
+    ],
+    "f0_fibre": [
+      16.90925576050261,
+      18.989234946409912
+    ],
+    "f2_fibre": [
+      17.033980120720734,
+      19.24741830323742
+    ],
+    "f0_coupling_mean": 1.2089499052764037,
+    "f2_coupling_mean": 1.2602277353847846,
+    "f0_terms": {
+      "geometric spreading": 15.702791788332283,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "scintillation": 0.08484496456038551,
+      "receive coupling (MMF)": 1.2066265776432834
+    },
+    "f0_flags": [
+      "receive coupling (MMF)"
+    ]
+  },
+  "b18_1in_circle_L1km_cn21e-15": {
+    "rytov": 0.019909543851127042,
+    "f0_bucket": [
+      11.066006574422474,
+      11.635317945811776
+    ],
+    "f2_bucket": [
+      11.083105779385004,
+      11.657184681780107
+    ],
+    "f0_fibre": [
+      11.06535657028838,
+      11.633502931366523
+    ],
+    "f2_fibre": [
+      11.15282170803464,
+      11.728395448745832
+    ],
+    "f0_coupling_mean": -0.0006500041340942175,
+    "f2_coupling_mean": 0.06971592864963583,
+    "f0_terms": {
+      "geometric spreading": 9.778278796204596,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.2871062607343262,
+      "scintillation": 0.006749340589030282,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": []
+  },
+  "b18_1in_circle_L1km_cn25e-15": {
+    "rytov": 0.09954771925563521,
+    "f0_bucket": [
+      11.063379947530708,
+      12.35305269951204
+    ],
+    "f2_bucket": [
+      11.134251507471035,
+      12.48746862005077
+    ],
+    "f0_fibre": [
+      11.065847117178409,
+      12.357476516846935
+    ],
+    "f2_fibre": [
+      11.203893850514184,
+      12.557211332029388
+    ],
+    "f0_coupling_mean": 0.0024671696477014393,
+    "f2_coupling_mean": 0.06964234304314942,
+    "f0_terms": {
+      "geometric spreading": 9.778278796204596,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.2871062607343262,
+      "scintillation": 0.03353885678677983,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": []
+  },
+  "b18_1in_circle_L1km_cn21e-14": {
+    "rytov": 0.19909543851127043,
+    "f0_bucket": [
+      11.063030740656359,
+      12.89544609667988
+    ],
+    "f2_bucket": [
+      11.232793628377724,
+      13.233401440761888
+    ],
+    "f0_fibre": [
+      11.06940118568005,
+      12.903908421165337
+    ],
+    "f2_fibre": [
+      11.302582379344228,
+      13.30522533641268
+    ],
+    "f0_coupling_mean": 0.006370445023691218,
+    "f2_coupling_mean": 0.06978875096650405,
+    "f0_terms": {
+      "geometric spreading": 9.778278796204596,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 1.2871062607343262,
+      "scintillation": 0.0665675680616317,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": []
+  },
+  "b36_2in_circle_L1km_cn21e-15": {
+    "rytov": 0.019909543851127042,
+    "f0_bucket": [
+      1.7212511116452756,
+      2.0736853171095433
+    ],
+    "f2_bucket": [
+      1.7473021340961046,
+      1.9755396049945433
+    ],
+    "f0_fibre": [
+      1.7221353819950858,
+      2.0761528631065254
+    ],
+    "f2_fibre": [
+      1.802430078968821,
+      2.0365777100777067
+    ],
+    "f0_coupling_mean": 0.0008842703498102011,
+    "f2_coupling_mean": 0.05512794487271644,
+    "f0_terms": {
+      "geometric spreading": 1.5410606804539684,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 0.1809095797225655,
+      "scintillation": 0.002633823131889824,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": []
+  },
+  "b36_2in_circle_L1km_cn25e-15": {
+    "rytov": 0.09954771925563521,
+    "f0_bucket": [
+      1.7216730314146365,
+      2.5148906021630753
+    ],
+    "f2_bucket": [
+      1.862603478932269,
+      2.483616438431725
+    ],
+    "f0_fibre": [
+      1.7223220467384963,
+      2.5231455597262955
+    ],
+    "f2_fibre": [
+      1.9191140101106146,
+      2.5565344896077415
+    ],
+    "f0_coupling_mean": 0.0006490153238598584,
+    "f2_coupling_mean": 0.05651053117834559,
+    "f0_terms": {
+      "geometric spreading": 1.5410606804539684,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 0.1809095797225655,
+      "scintillation": 0.013137285254667171,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": []
+  },
+  "b36_2in_circle_L1km_cn21e-14": {
+    "rytov": 0.19909543851127043,
+    "f0_bucket": [
+      1.7234885101272504,
+      2.8605379878124526
+    ],
+    "f2_bucket": [
+      2.006178283321565,
+      3.083779009358486
+    ],
+    "f0_fibre": [
+      1.720489055489038,
+      2.8572626879292375
+    ],
+    "f2_fibre": [
+      2.0642217037986295,
+      3.1636603040028466
+    ],
+    "f0_coupling_mean": -0.0029994546382123843,
+    "f2_coupling_mean": 0.058043420477064345,
+    "f0_terms": {
+      "geometric spreading": 1.5410606804539684,
+      "atmospheric extinction (horizontal)": 0.0,
+      "pointing jitter": 0.0,
+      "transmit Gaussian efficiency": 0.1809095797225655,
+      "scintillation": 0.026195568395416563,
+      "receive coupling (MMF)": 0.0
+    },
+    "f0_flags": []
+  }
+}
