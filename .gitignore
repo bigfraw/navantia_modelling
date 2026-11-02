@@ -11,3 +11,4 @@ venv/
 # Link-budget trial data (lives on bigfraw)
 scripts/link_budget/data/
 scripts/link_budget/*.log
+scripts/divergence_jitter_data/
