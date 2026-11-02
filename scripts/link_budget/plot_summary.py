@@ -13,7 +13,8 @@ bigfraw) and writes, in `figures/`:
 
 Each case is one group, with one colour for each Cn2. The filled dot is the
 mean and the open dot is the p99, each with +/- 1 bootstrap standard error
-(the resample of the trials; paired for the tip-tilt change).
+(the resample of the trials; paired for the tip-tilt change). The
+`bucket_vs_fibre.png` figure also shows the p90 as an open diamond.
 
 Command:
     python scripts/link_budget/plot_summary.py
@@ -45,7 +46,7 @@ def load(stem, tag):
         return json.load(f)
 
 
-PENDING = {"mean_db": [np.nan, np.nan], "p99_db": [np.nan, np.nan]}
+PENDING = {s: [np.nan, np.nan] for s in ("mean_db", "p90_db", "p99_db")}
 
 
 def present(path_m, tag, done=None):
@@ -75,13 +76,18 @@ def offsets():
     return (np.arange(len(CN2)) - 1) * WIDTH
 
 
-def dots(ax, x, stat, j, sign=1.0):
-    """The mean (filled) and the p99 (open), each +/- 1 bootstrap SE."""
-    for name, face, lab in (("mean_db", SHADES[j], "mean"),
-                            ("p99_db", "white", "p99")):
+MARKS = {"mean_db": ("o", True, "mean"), "p90_db": ("D", False, "p90"),
+         "p99_db": ("o", False, "p99")}
+
+
+def dots(ax, x, stat, j, sign=1.0, names=("mean_db", "p99_db")):
+    """Each statistic in `names` (see MARKS), each +/- 1 bootstrap SE."""
+    for name in names:
+        m, filled, lab = MARKS[name]
+        face = SHADES[j] if filled else "white"
         v = sign * np.array([s[name][0] for s in stat])
         se = np.array([s[name][1] for s in stat])
-        ax.errorbar(x, v, yerr=se, fmt="o", markersize=6,
+        ax.errorbar(x, v, yerr=se, fmt=m, markersize=6 if m == "o" else 5,
                     markerfacecolor=face, markeredgecolor=SHADES[j],
                     markeredgewidth=1.6, ecolor=SHADES[j], elinewidth=1.2,
                     capsize=2.5, label=f"{lab}, Cn2 {CN2[j]:.0e} m^-2/3")
@@ -130,7 +136,7 @@ def tt_figure():
 
 
 def bucket_stats(cell, B=2000, seed=1):
-    """Bucket and coupling loss (mean, p99), each [value, bootstrap SE].
+    """Bucket and coupling loss (mean, p90, p99), each [value, bootstrap SE].
 
     The coupling loss is fibre minus bucket on the SAME resample (paired).
     """
@@ -141,16 +147,19 @@ def bucket_stats(cell, B=2000, seed=1):
     idx = np.vstack([np.arange(pb.size),
                      rng.integers(0, pb.size, (B, pb.size))])
 
-    def mean_p99(p, i):
-        return db(np.mean(p[i])), np.percentile(db(p[i]), 99)
+    def stats(p, i):
+        return db(np.mean(p[i])), *np.percentile(db(p[i]), (90, 99))
 
-    v = np.array([[*mean_p99(pb, i), *mean_p99(pf, i)] for i in idx])
-    v = np.column_stack([v[:, :2], v[:, 2:] - v[:, :2]])
+    v = np.array([[*stats(pb, i), *stats(pf, i)] for i in idx])
+    v = np.column_stack([v[:, :3], v[:, 3:] - v[:, :3]])
 
     def pair(c):
-        return {"mean_db": [v[0, c], v[1:, c].std()],
-                "p99_db": [v[0, c + 1], v[1:, c + 1].std()]}
-    return pair(0), pair(2)
+        return {n: [v[0, c + k], v[1:, c + k].std()]
+                for k, n in enumerate(BUCKET_STATS)}
+    return pair(0), pair(3)
+
+
+BUCKET_STATS = ("mean_db", "p90_db", "p99_db")
 
 
 def bucket_figure():
@@ -163,8 +172,8 @@ def bucket_figure():
                       os.path.join(DATA, k, "reads.npz")) else (PENDING, PENDING)
                   for k in (key(n, cn2, path_m) for n in names)]
             x = np.arange(len(names)) + dx
-            dots(axes[0, col], x, [s[0] for s in st], j)
-            dots(axes[1, col], x, [s[1] for s in st], j)
+            dots(axes[0, col], x, [s[0] for s in st], j, names=BUCKET_STATS)
+            dots(axes[1, col], x, [s[1] for s in st], j, names=BUCKET_STATS)
         for row, what, ylab in (
                 (0, "aperture (bucket) loss", "Loss (dB), +/- 1 bootstrap SE"),
                 (1, "fibre coupling loss = fibre - bucket",
@@ -174,7 +183,7 @@ def bucket_figure():
             style(ax, f"{title}: {what}", ylab, names)
         axes[1, col].axhline(0, color="#c3c2b7", linewidth=1)
     fig.legend(*axes[0, 0].get_legend_handles_labels(), frameon=False,
-               fontsize=8, ncol=6, loc="outside lower center")
+               fontsize=8, ncol=3, loc="outside lower center")
     return fig
 
 
