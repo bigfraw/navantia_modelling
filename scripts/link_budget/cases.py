@@ -102,6 +102,11 @@ CASES = {
                            4 * 12.56e-3, 2048),
 }
 
+# The pixel rule of a cropped grid: 4 pixels across the launch waist radius
+# (the olb edge rule, grid.PIXELS_PER_FEATURE). The b9 cells of record
+# have about 1 pixel across it, because n = 4096 spreads over 8 to 9 m.
+PIXELS_PER_WAIST = 4
+
 # Every case runs at 1024 px at 1 km (the 45 deg study's value): 0.23 to
 # 0.78 mm, 23 to 220 px across the aperture, a side over 3 vacuum radii.
 N_PX_1KM = 1024
@@ -122,10 +127,10 @@ LEGACY = {
 }
 
 
-def key(name, cn2, path_m=10e3):
+def key(name, cn2, path_m=10e3, crop=None):
     """The cell name (a 10 km cell keeps the name of the first run)."""
     tag = "" if path_m == 10e3 else f"_L{path_m / 1e3:g}km"
-    return f"{name}{tag}_cn2{cn2:.0e}"
+    return f"{name}{tag}_cn2{cn2:.0e}" + ("" if crop is None else f"_crop{crop:g}")
 
 
 def build_scenario(case, cn2, path_m):
@@ -142,14 +147,29 @@ def build_scenario(case, cn2, path_m):
             HorizontalPath(path_m))
 
 
-def campaign(name, cn2, path_m, fft_backend="cupy"):
-    """The campaign of one cell: the legacy record, or a new one in DATA."""
+def campaign(name, cn2, path_m, fft_backend="cupy", crop=None):
+    """The campaign of one cell: the legacy record, or a new one in DATA.
+
+    crop is None for the grid of record. A float is the side [m] of a
+    CROPPED grid (validation/terrestrial_grid_crop in olb). Its pixel is the
+    finer of the pixel of record and PIXELS_PER_WAIST across the launch
+    waist. A cropped cell is a new campaign, so it takes the olb terrestrial
+    absorber (band 0.25, strength 16). Its beam moments are not valid.
+    """
     case = CASES[name]
     scn, geo = build_scenario(case, cn2, path_m)
     grid, plan = turbulent_grid(scn, geo, preset=PRESET,
                                 L0_m=scn.channel.site.outer_scale_m)[:2]
     grid = dataclasses.replace(
         grid, n=case.n_px if path_m == 10e3 else N_PX_1KM)
+    if crop is not None:
+        dx = min(grid.pixel_m, case.waist_m / PIXELS_PER_WAIST)
+        grid = dataclasses.replace(
+            grid, size_m=float(crop), n=int(np.ceil(crop / dx / 256)) * 256)
+        root = os.path.join(DATA, key(name, cn2, path_m, crop))
+        return Campaign(scn, geo, root, seed=SEED, preset=PRESET,
+                        block_size=BLOCK, grid=grid, plan=plan,
+                        fft_backend=fft_backend)
     legacy = LEGACY.get((name, cn2, path_m))
     root = (os.path.join(OLB_CAMPAIGNS, legacy) if legacy
             else os.path.join(DATA, key(name, cn2, path_m)))

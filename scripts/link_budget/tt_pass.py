@@ -97,12 +97,12 @@ def tilted(F0, theta, sign):
     return F
 
 
-def run_cell(name, cn2, path_m, n, sign, fft_backend, tag):
+def run_cell(name, cn2, path_m, n, sign, fft_backend, tag, crop=None):
     case = CASES[name]
-    camp = campaign(name, cn2, path_m, fft_backend)
+    camp = campaign(name, cn2, path_m, fft_backend, crop)
     stored = [t.collected_power
               for t in camp.load(GATE_TRIALS, fields=False).trials]
-    cell = key(name, cn2, path_m)
+    cell = key(name, cn2, path_m, crop)
     os.makedirs(os.path.join(DATA, cell), exist_ok=True)
     out_path = os.path.join(DATA, cell, f"tt_pass{tag}.npz")
     rows = []
@@ -114,10 +114,13 @@ def run_cell(name, cn2, path_m, n, sign, fft_backend, tag):
     grid, plan = camp.grid, camp.plan
     z = np.asarray(plan.z_m, dtype=float)
     z_rev = (plan.z_total_m - z)[::-1]
-    bmask = super_gaussian_boundary(
-        grid.n, PRESETS[camp.preset].boundary_width_frac)
+    # The mask of the campaign: the absorber it ran with (None = the record).
+    band, strength = camp.absorber or (
+        PRESETS[camp.preset].boundary_width_frac, 1.0)
+    bmask = super_gaussian_boundary(grid.n, band, strength=strength)
     entropy = _resolve_seed(camp.seed)
-    r_win = 3 * vacuum_radius(case, path_m)
+    # A cropped grid cuts the window, so its beam moments are NOT valid.
+    r_win = min(3 * vacuum_radius(case, path_m), (1 - band) * grid.size_m / 2)
     half = int(np.ceil(1.5 * case.aperture_m / 2 / grid.pixel_m))
     ctx = {}
     print(f"{cell}: {grid.n} px, {grid.pixel_m * 1e3:.2f} mm, "
@@ -249,6 +252,8 @@ def main():
     ap.add_argument("--trials", type=int, default=300)
     ap.add_argument("--sign", type=float, default=-1.0, choices=(-1.0, 1.0))
     ap.add_argument("--fft-backend", default="cupy")
+    ap.add_argument("--crop", type=float, default=None,
+                    help="side [m] of a cropped grid (see cases.campaign)")
     ap.add_argument("--tag", default="",
                     help="suffix of the npz and the result key (smoke runs)")
     args = ap.parse_args()
@@ -261,8 +266,8 @@ def main():
     for name in args.case:
         for cn2 in args.cn2:
             rows = run_cell(name, cn2, path_m, args.trials, args.sign,
-                            args.fft_backend, args.tag)
-            k = key(name, cn2, path_m) + args.tag
+                            args.fft_backend, args.tag, args.crop)
+            k = key(name, cn2, path_m, args.crop) + args.tag
             results[k] = summary(rows, name)
             s = results[k]
             print(f"  wander rms fwd {s['wander_rms_m_fwd']:.4f} m, corrected "

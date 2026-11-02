@@ -37,10 +37,10 @@ class StoredRead:
         return read(rec.field(), self.case, rec.context)
 
 
-def cell(name, cn2, path_m, n, workers, fft_backend):
-    camp = campaign(name, cn2, path_m, fft_backend)
+def cell(name, cn2, path_m, n, workers, fft_backend, crop=None):
+    camp = campaign(name, cn2, path_m, fft_backend, crop)
     case = CASES[name]
-    k = key(name, cn2, path_m)
+    k = key(name, cn2, path_m, crop)
     print(f"{k}: {camp.root_dir}\n  grid {camp.grid.n} px x "
           f"{camp.grid.size_m:.3f} m ({camp.grid.pixel_m * 1e3:.2f} mm), "
           f"{camp.plan.z_m.size} screens", flush=True)
@@ -72,6 +72,8 @@ def main():
     ap.add_argument("--trials", type=int, default=1000)
     ap.add_argument("--workers", default="8")
     ap.add_argument("--fft-backend", default="cupy")
+    ap.add_argument("--crop", type=float, default=None,
+                    help="side [m] of a cropped grid (see cases.campaign)")
     args = ap.parse_args()
     workers = args.workers if args.workers == "auto" else int(args.workers)
 
@@ -82,9 +84,9 @@ def main():
     results = json.load(open(out)) if os.path.exists(out) else {}
     for name in args.case:
         for cn2 in args.cn2:
-            k = key(name, cn2, path_m)
+            k = key(name, cn2, path_m, args.crop)
             results[k] = cell(name, cn2, path_m, args.trials, workers,
-                              args.fft_backend)
+                              args.fft_backend, args.crop)
             print(json.dumps(results[k], indent=1), flush=True)
             with open(out, "w") as f:
                 json.dump(results, f, indent=2)
